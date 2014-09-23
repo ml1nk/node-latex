@@ -60,29 +60,34 @@ function handleErrors(dirpath, result) {
     }
     //Try to crawl through the horrible mess that LaTeX shat upon us
     var log = fs.createReadStream(log_file);
+    var full_err = [];
     var err = [];
     log.on("data", function(data) {
       var lines = data.toString().split("\n");
       for(var i=0; i<lines.length; ++i) {
         var l = lines[i];
-        if(l.length > 0 && l.charAt(0) === "!") {
-          err.push(lines[i]);
+        if(l.length > 0) {
+          full_err.push(lines[i]);
+          if (l.charAt(0) === '!') {
+            err.push(lines[i]);
+          }
         }
       }
     });
     log.on("end", function() {
-      if(err.length > 0) {
-        err.unshift("LaTeX Syntax Error");
-        result.emit("error", new Error(err.join("\n")));
+
+      if(full_err.length > 0) {
+        result.emit("error", new LatexSyntaxError("LaTeX Syntax Error", err, full_err));
       } else {
-        result.emit("error", new Error("Unspecified LaTeX error"));
+        result.emit("error", new Error("Unspecified LaTeX Error"));
       }
     });
   });
 }
 
 //Converts a expression into a LaTeX image
-module.exports = function(doc, options) {
+module.exports.LatexSyntaxError = LatexSyntaxError;
+module.exports.create = function(doc, options) {
   if(!options) {
     options = {};
   }
@@ -162,4 +167,12 @@ module.exports = function(doc, options) {
   });
 
   return result;
+};
+
+function LatexSyntaxError ( message, error_log, output_log) {
+  this.message = message;
+  this.error_log = error_log;
+  this.output_log = output_log;
 }
+LatexSyntaxError.prototype = new Error();
+LatexSyntaxError.prototype.constructor = LatexSyntaxError;

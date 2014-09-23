@@ -60,24 +60,20 @@ function handleErrors(dirpath, result) {
     }
     //Try to crawl through the horrible mess that LaTeX shat upon us
     var log = fs.createReadStream(log_file);
-    var full_err = [];
     var err = [];
     log.on("data", function(data) {
       var lines = data.toString().split("\n");
       for(var i=0; i<lines.length; ++i) {
         var l = lines[i];
         if(l.length > 0) {
-          full_err.push(lines[i]);
-          if (l.charAt(0) === '!') {
-            err.push(lines[i]);
-          }
+          err.push(lines[i]);
         }
       }
     });
     log.on("end", function() {
 
-      if(full_err.length > 0) {
-        result.emit("error", new LatexSyntaxError("LaTeX Syntax Error", err, full_err));
+      if(err.length > 0) {
+        result.emit("error", new LatexSyntaxError("LaTeX Syntax Error", err));
       } else {
         result.emit("error", new Error("Unspecified LaTeX Error"));
       }
@@ -169,10 +165,38 @@ module.exports.create = function(doc, options) {
   return result;
 };
 
-function LatexSyntaxError ( message, error_log, output_log) {
+function LatexSyntaxError (message, raw_log) {
   this.message = message;
-  this.error_log = error_log;
-  this.output_log = output_log;
+  this.raw_log = raw_log;
+  var log = [];
+  var err_message;
+  for(var i=0; i<this.raw_log.length; ++i) {
+    var log_line = this.raw_log[i];
+    if(/^!/.test(log_line)) {
+      if (err_message) {
+        log.push(err_message);
+      }
+      err_message = log_line;
+    }
+    var regex = /^l\.(\d+)(.+)/;
+    if(err_message && regex.test(log_line)) {
+      var matches = log_line.match(regex);
+      var trace = [];
+      trace.push(matches[2]);
+      for(var j=i+1; j<this.raw_log.length; ++j) {
+        var stack_line = this.raw_log[j];
+        if(/^\s/.test(stack_line)){
+          trace.push(stack_line.replace(/^\s+/, '  '));
+        } else {
+          break;
+        }
+      }
+      log.push('Line ' + matches[1] + ': ' + err_message.replace(/^!\s+/, '') + '\n' + trace.join('\n'));
+      log.push('');
+      err_message = undefined;
+    }
+    this.trace = log.join('\n');
+  }
 }
 LatexSyntaxError.prototype = new Error();
 LatexSyntaxError.prototype.constructor = LatexSyntaxError;

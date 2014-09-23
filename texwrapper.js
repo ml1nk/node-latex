@@ -110,6 +110,7 @@ module.exports = function(doc, options) {
     tex_file.on("close", function() {
       //Invoke LaTeX
       var tex = spawn(tex_command, [
+        "-halt-on-error",
         "-interaction=nonstopmode",
         "texput.tex"
       ], {

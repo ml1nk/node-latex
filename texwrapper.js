@@ -124,6 +124,8 @@ module.exports = function(doc, options) {
           console.error("\nThere was an error spawning " + tex_command + ". \n"
                         + "Please make sure your LaTeX distribution is"
                         + "properly installed.\n");
+        } else {
+          handleErrors(dirpath, result);
         }
       });
 

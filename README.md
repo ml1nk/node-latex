@@ -25,7 +25,7 @@ Usage
 
 Here is an example of how to use the library in one line:
 
-    require("latex")([
+    require("latex").create([
       "\\documentclass{article}",
       "\\begin{document}",
       "hello world",
@@ -34,7 +34,7 @@ Here is an example of how to use the library in one line:
 
 This will spit out a formatted PDF article to stdout that says "hello world".  The result of calling the function is returned as a stream and can be processed using other tools.  If you want to convert the result into an image or pdf, you can use [graphics magic](http://aheckmann.github.com/gm/).
 
-`require("latex")(doc[, options])`
+`require("latex").create(doc[, options])`
 ----------------------------------
 The only exported function from `node-latex` is a function that takes as input a raw LaTeX document and returns a stream representing the document state. The type of `doc` must be one of the following:
 

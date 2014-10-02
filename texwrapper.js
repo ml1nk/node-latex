@@ -89,6 +89,7 @@ module.exports.create = function(doc, options) {
   }
 
   var format = options.format || "pdf";
+  var halt_on_error = options.halt_on_error || false;
 
   //LaTeX command
   var tex_command = options.command || (format === "pdf" ? "pdflatex" : "latex");
@@ -109,12 +110,17 @@ module.exports.create = function(doc, options) {
     var tex_file = fs.createWriteStream(input_path);
 
     tex_file.on("close", function() {
-      //Invoke LaTeX
-      var tex = spawn(tex_command, [
-        "-halt-on-error",
+
+      var tex_args = [
         "-interaction=nonstopmode",
         "texput.tex"
-      ], {
+      ];
+
+      if (halt_on_error) {
+        tex_args.unshift("-halt-on-error");
+      }
+      //Invoke LaTeX
+      var tex = spawn(tex_command, tex_args, {
         cwd: dirpath,
         env: process.env
       });

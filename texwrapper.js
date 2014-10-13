@@ -88,8 +88,14 @@ module.exports.create = function(doc, options) {
     options = {};
   }
 
+  var env = process.env;
+
   var format = options.format || "pdf";
   var halt_on_error = options.halt_on_error || false;
+
+  if (options.buf_size) {
+    env.buf_size = options.buf_size;
+  }
 
   //LaTeX command
   var tex_command = options.command || (format === "pdf" ? "pdflatex" : "latex");
@@ -122,7 +128,7 @@ module.exports.create = function(doc, options) {
       //Invoke LaTeX
       var tex = spawn(tex_command, tex_args, {
         cwd: dirpath,
-        env: process.env
+        env: env
       });
 
       // Let the user know if LaTeX couldn't be found

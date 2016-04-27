@@ -139,6 +139,7 @@ module.exports.create = function(doc, options) {
             console.error("\nThere was an error spawning " + tex_command + ". \n"
               + "Please make sure your LaTeX distribution is"
               + "properly installed.\n");
+             result.emit("error", "No such file, your Latex distribution is installed?");
           } else {
             handleErrors(dirpath, result);
           }

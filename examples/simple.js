@@ -1,6 +1,6 @@
 
 //Simple example
-var dvistream = require("../texwrapper.js")([
+var dvistream = require("../texwrapper.js").create([
   "\\documentclass{article}",
   "\\begin{document}",
   "abc",

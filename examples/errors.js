@@ -1,1 +1,1 @@
-require("../texwrapper.js")("asdhfaksdhf").pipe(process.stdout);
+require("../texwrapper.js").create("asdhfaksdhf").pipe(process.stdout);

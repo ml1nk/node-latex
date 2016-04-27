@@ -5,5 +5,7 @@ var dvistream = require("../texwrapper.js").create([
   "\\begin{document}",
   "abc",
   "\\end{document}"
-]);
+],{
+  cmd_turns: 2
+});
 dvistream.pipe(process.stdout);

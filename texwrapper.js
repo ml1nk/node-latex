@@ -99,7 +99,8 @@ module.exports.create = function(doc, options) {
 
   //LaTeX command
   var tex_command = options.command || (format === "pdf" ? "pdflatex" : "latex");
-
+  var cmd_turns = options.cmd_turns || 1;
+    
   //Create result
   var result = through();
   awaitDir(function(err, dirpath) {
@@ -126,37 +127,46 @@ module.exports.create = function(doc, options) {
         tex_args.unshift("-halt-on-error");
       }
       //Invoke LaTeX
-      var tex = spawn(tex_command, tex_args, {
-        cwd: dirpath,
-        env: env
-      });
+      function invoke() {
+        var tex = spawn(tex_command, tex_args, {
+          cwd: dirpath,
+          env: env
+        });
 
-      // Let the user know if LaTeX couldn't be found
-      tex.on('error', function(err) {
-        if (err.code === 'ENOENT') {
-          console.error("\nThere was an error spawning " + tex_command + ". \n"
-                        + "Please make sure your LaTeX distribution is"
-                        + "properly installed.\n");
-        } else {
-          handleErrors(dirpath, result);
-        }
-      });
-
-      //Wait for LaTeX to finish its thing
-      tex.on("exit", function(code, signal) {
-        var output_file = path.join(dirpath, "texput." + format);
-        fs.exists(output_file, function(exists) {
-          if(exists) {
-            var stream = fs.createReadStream(output_file);
-            stream.on("close", function() {
-              fse.remove(dirpath);
-            });
-            stream.pipe(result);
+        // Let the user know if LaTeX couldn't be found
+        tex.on('error', function (err) {
+          if (err.code === 'ENOENT') {
+            console.error("\nThere was an error spawning " + tex_command + ". \n"
+              + "Please make sure your LaTeX distribution is"
+              + "properly installed.\n");
           } else {
             handleErrors(dirpath, result);
           }
         });
-      });
+
+        //Wait for LaTeX to finish its thing
+        tex.on("exit", function (code, signal) {
+          var output_file = path.join(dirpath, "texput." + format);
+          fs.exists(output_file, function (exists) {
+            if (exists) {
+              cmd_turns--;
+              if (cmd_turns == 0) {
+                var stream = fs.createReadStream(output_file);
+                stream.on("close", function () {
+                  fse.remove(dirpath);
+                });
+                stream.pipe(result);
+              }
+              else {
+                invoke();
+              }
+            } else {
+              handleErrors(dirpath, result);
+            }
+          });
+        });
+      }
+      invoke();
     });
 
     if(typeof doc === "string" || doc instanceof Buffer) {

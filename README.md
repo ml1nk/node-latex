@@ -47,6 +47,7 @@ In addition, you can also specify the following additional parameters via the `o
 
 * `command`: An optional override for the latex command.  By default calls `latex`.
 * `format`: Either "pdf" or "dvi".  By default returns a pdf.
+* `cmd_turns`: An optional to specify how many times to invoke latex command. By default it is 1.
 
 The function returns a readable Stream object representing a LaTeX encoded document in either PDF or [DVI format](http://en.wikipedia.org/wiki/Device_independent_file_format).  If there were errors in the syntax of the document, they will be raised as errors on this Stream object.
 

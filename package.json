@@ -7,9 +7,9 @@
     "example": "examples"
   },
   "dependencies": {
-    "temp": "~0.5.0",
-    "through": "~2.1.0",
-    "fs-extra": "~0.3.2"
+    "temp": "^0.8.3",
+    "through": "^2.3.8",
+    "fs-extra": "^0.30.0 "
   },
   "devDependencies": {},
   "scripts": {
